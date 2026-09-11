@@ -1,0 +1,13 @@
+schema = 1
+
+[paths]
+allow = ["src/", "docs/", "tests/"]
+deny = [".env", ".env.*", "*.pem", "**/secrets/**"]
+max_files_changed = 80
+
+[exec]
+allow_network = false
+allow_binaries = ["python3", "git", "ls", "cat"]
+require_os_isolation = true
+timeout_sec = 30
+fail_on_secret = true

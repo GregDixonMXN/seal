@@ -1,0 +1,4 @@
+allow_paths = ["crates/", "services/", "strategies/", "research/", "web/", "schemas/", "migrations/", "infra/", "config/", "scripts/", "docs/", "examples/", "install.sh"]
+deny_globs = [".env", ".env.*", "*.pem", "**/secrets/**", "**/auth.json", "**/*api*key*"]
+allow_binaries = ["cargo", "rustc", "git", "docker", "python3", "go"]
+allow_network = false
