@@ -10,9 +10,9 @@ inputs:
     required: false
     default: seal-out
   version:
-    description: Seal release version, without the leading v. Falls back to main until the first tagged release.
+    description: Seal release version, without the leading v.
     required: false
-    default: main
+    default: 0.1.0
   repository:
     description: GitHub repository hosting seal releases (owner/name).
     required: false
@@ -20,27 +20,24 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: "1.24"
-        cache: true
-    - name: Fetch pinned seal source
+    - name: Require Linux x86_64
       shell: bash
-      env:
-        SEAL_VERSION: ${{ inputs.version }}
-        SEAL_REPOSITORY: ${{ inputs.repository }}
       run: |
         set -eu
-        DEST="${RUNNER_TEMP:-$(mktemp -d)}/seal-src"
-        rm -rf "$DEST"
-        if [ "$SEAL_VERSION" = "main" ]; then
-          git clone --depth 1 "https://github.com/${SEAL_REPOSITORY}.git" "$DEST"
-        else
-          git clone --depth 1 --branch "v${SEAL_VERSION}" "https://github.com/${SEAL_REPOSITORY}.git" "$DEST"
-        fi
-        (cd "$DEST" && go build -o "$DEST/seal" .)
-        echo "$DEST" >> "$GITHUB_PATH"
+        [ "$(uname -s)-$(uname -m)" = "Linux-x86_64" ] || { echo "seal action supports Linux x86_64 runners only" >&2; exit 1; }
+    - name: Download seal release binary
+      shell: bash
+      run: |
+        set -eu
+        V="${{ inputs.version }}"
+        R="${{ inputs.repository }}"
+        A="seal-${V}-linux-x86_64.tar.gz"
+        cd "$RUNNER_TEMP"
+        curl -fsSL -o "$A" "https://github.com/${R}/releases/download/v${V}/${A}"
+        curl -fsSL -o "${A}.sha256" "https://github.com/${R}/releases/download/v${V}/${A}.sha256"
+        (cd "$RUNNER_TEMP" && sha256sum -c "${A}.sha256")
+        tar -xzf "$RUNNER_TEMP/$A" -C "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/seal-${V}-linux-x86_64" >> "$GITHUB_PATH"
     - name: Compile and check drift
       shell: bash
       env:
