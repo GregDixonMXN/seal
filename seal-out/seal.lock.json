@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "source": {
+    "path": "seal.toml",
+    "sha256": "dcd75895e25fd4dadeedc043f35402b17a30d6ba6d337ea4ee6faa389d03a193"
+  },
+  "files": [
+    {
+      "path": "annalist.policy.toml",
+      "sha256": "47a5d33f54b5ad8e8d2cb6532397ccb1a71c7db42f2565d2c792bd1d94d7c0e7"
+    },
+    {
+      "path": "paldron.policy.toml",
+      "sha256": "1f314b7f679ba63c5143b1e950287b48f358b717f8dd696460b07d3b26dbe933"
+    }
+  ]
+}
