@@ -1,6 +1,6 @@
-// Command docket compiles one org policy (docket.toml) into the policy
+// Command seal compiles one org policy (seal.toml) into the policy
 // files Annalist and Paldron actually enforce. Optional glue: every
-// tool works alone; Docket only keeps their policies from drifting.
+// tool works alone; Seal only keeps their policies from drifting.
 package main
 
 import (
@@ -10,13 +10,13 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: docket <compile|stamp|verify> [flags]")
+		fmt.Fprintln(os.Stderr, "usage: seal <compile|stamp|verify> [flags]")
 		os.Exit(1)
 	}
 	switch os.Args[1] {
 	case "compile":
 		if err := runCompile(os.Args[2:]); err != nil {
-			fmt.Fprintln(os.Stderr, "docket:", err)
+			fmt.Fprintln(os.Stderr, "seal:", err)
 			os.Exit(1)
 		}
 	case "stamp":
@@ -24,7 +24,7 @@ func main() {
 	case "verify":
 		os.Exit(runVerify(os.Args[2:]))
 	default:
-		fmt.Fprintln(os.Stderr, "docket: unknown command", os.Args[1])
+		fmt.Fprintln(os.Stderr, "seal: unknown command", os.Args[1])
 		os.Exit(1)
 	}
 }

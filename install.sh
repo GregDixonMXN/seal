@@ -1,5 +1,5 @@
 #!/bin/sh
-# One-command install for the Annalist + Paldron + Docket suite.
+# One-command install for the Annalist + Paldron + Seal suite.
 # Builds from local checkouts when present, else prints release URLs.
 # Usage: ./install.sh [--prefix ~/.local]
 set -e
@@ -23,6 +23,6 @@ else
   echo "missing: ~/projects/paldron (https://github.com/GregDixonMXN/paldron)"
 fi
 
-go build -o "$BIN/docket" .
-echo "installed: docket"
+go build -o "$BIN/seal" .
+echo "installed: seal"
 echo "PATH: $BIN (annalist run -- paldron exec -- <cmd>)"

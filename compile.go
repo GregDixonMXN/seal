@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Policy is the v0 docket.toml schema. Unknown keys are an error;
+// Policy is the v0 seal.toml schema. Unknown keys are an error;
 // there is no silent drop.
 type Policy struct {
 	Schema          int
@@ -208,7 +208,7 @@ func shaFile(b []byte) string {
 	return hex.EncodeToString(h[:])
 }
 
-// runCompile implements: docket compile --in FILE --out-dir DIR.
+// runCompile implements: seal compile --in FILE --out-dir DIR.
 func runCompile(args []string) error {
 	in, out := "", ""
 	for i := 0; i < len(args); i++ {
@@ -228,7 +228,7 @@ func runCompile(args []string) error {
 		}
 	}
 	if in == "" || out == "" {
-		return fmt.Errorf("usage: docket compile --in docket.toml --out-dir ./docket-out")
+		return fmt.Errorf("usage: seal compile --in seal.toml --out-dir ./seal-out")
 	}
 	raw, err := os.ReadFile(in)
 	if err != nil {
@@ -262,9 +262,9 @@ func runCompile(args []string) error {
 		return err
 	}
 	lock = append(lock, '\n')
-	if err := os.WriteFile(filepath.Join(out, "docket.lock.json"), lock, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(out, "seal.lock.json"), lock, 0o644); err != nil {
 		return err
 	}
-	fmt.Printf("compiled %s -> %s/{annalist.policy.toml,paldron.policy.toml,docket.lock.json}\n", in, out)
+	fmt.Printf("compiled %s -> %s/{annalist.policy.toml,paldron.policy.toml,seal.lock.json}\n", in, out)
 	return nil
 }

@@ -1,3 +1,3 @@
-module github.com/GregDixonMXN/docket
+module github.com/GregDixonMXN/seal
 
 go 1.23

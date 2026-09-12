@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// docket stamp freezes one wrapped execution into a signed-style receipt:
+// seal stamp freezes one wrapped execution into a signed-style receipt:
 // which policies, which exits, what bundle, what verdict. Exit code mirrors
 // the verdict: 0 pass, 2 deny, 1 broken. The receipt is always written
 // unless its own inputs are unusable.
@@ -110,7 +110,7 @@ func runStamp(args []string) (code int) {
 	}
 	receipt := map[string]any{
 		"schema":     1,
-		"docket_id":  hex.EncodeToString(id),
+		"seal_id":    hex.EncodeToString(id),
 		"created_at": time.Now().UTC().Format(time.RFC3339),
 		"command":    command,
 		"annalist": map[string]any{
@@ -130,7 +130,7 @@ func runStamp(args []string) (code int) {
 	if err := os.WriteFile(out, append(raw, '\n'), 0o644); err != nil {
 		return fail("write %s: %v", out, err)
 	}
-	fmt.Printf("stamped %s -> %s\n", receipt["docket_id"], out)
+	fmt.Printf("stamped %s -> %s\n", receipt["seal_id"], out)
 	switch verdict {
 	case "pass":
 		return 0
@@ -142,7 +142,7 @@ func runStamp(args []string) (code int) {
 }
 
 func fail(format string, args ...any) int {
-	fmt.Fprintf(os.Stderr, "docket stamp: "+format+"\n", args...)
+	fmt.Fprintf(os.Stderr, "seal stamp: "+format+"\n", args...)
 	return 1
 }
 
@@ -185,7 +185,7 @@ func hashBundle(dir string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-// lockSourceHash returns the source sha256 recorded in a docket.lock.json.
+// lockSourceHash returns the source sha256 recorded in a seal.lock.json.
 func lockSourceHash(path string) (string, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {

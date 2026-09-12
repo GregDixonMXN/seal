@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// docket verify checks a receipt: schema, required fields, verdict
+// seal verify checks a receipt: schema, required fields, verdict
 // consistency, and — with --bundle — that the bundle still hashes to
 // the recorded digest. Exit 0 valid, 1 broken.
 func runVerify(args []string) int {
@@ -22,23 +22,23 @@ func runVerify(args []string) int {
 			if file == "" && args[i][0] != '-' {
 				file = args[i]
 			} else {
-				fmt.Fprintf(os.Stderr, "docket verify: unknown flag %q\n", args[i])
+				fmt.Fprintf(os.Stderr, "seal verify: unknown flag %q\n", args[i])
 				return 1
 			}
 		}
 	}
 	if file == "" {
-		fmt.Fprintln(os.Stderr, "docket verify: receipt path required")
+		fmt.Fprintln(os.Stderr, "seal verify: receipt path required")
 		return 1
 	}
 	raw, err := os.ReadFile(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "docket verify: %v\n", err)
+		fmt.Fprintf(os.Stderr, "seal verify: %v\n", err)
 		return 1
 	}
 	var r struct {
 		Schema    int    `json:"schema"`
-		DocketID  string `json:"docket_id"`
+		SealID    string `json:"seal_id"`
 		CreatedAt string `json:"created_at"`
 		Command   string `json:"command"`
 		Annalist  *struct {
@@ -52,18 +52,18 @@ func runVerify(args []string) int {
 		Verdict string `json:"verdict"`
 	}
 	if err := json.Unmarshal(raw, &r); err != nil {
-		fmt.Fprintf(os.Stderr, "docket verify: bad JSON: %v\n", err)
+		fmt.Fprintf(os.Stderr, "seal verify: bad JSON: %v\n", err)
 		return 1
 	}
 	bad := func(format string, args ...any) int {
-		fmt.Fprintf(os.Stderr, "docket verify: "+format+"\n", args...)
+		fmt.Fprintf(os.Stderr, "seal verify: "+format+"\n", args...)
 		return 1
 	}
 	if r.Schema != 1 {
 		return bad("schema %d, want 1", r.Schema)
 	}
-	if r.DocketID == "" || r.CreatedAt == "" || r.Command == "" {
-		return bad("docket_id, created_at and command are required")
+	if r.SealID == "" || r.CreatedAt == "" || r.Command == "" {
+		return bad("seal_id, created_at and command are required")
 	}
 	if r.Annalist == nil || r.Annalist.Session == "" || r.Paldron == nil {
 		return bad("annalist{session,gate_exit} and paldron{exit} are required")
@@ -90,6 +90,6 @@ func runVerify(args []string) int {
 			return bad("bundle digest mismatch: have %s want %s", h, *r.Annalist.BundleHash)
 		}
 	}
-	fmt.Printf("verify ok: %s verdict=%s\n", r.DocketID, r.Verdict)
+	fmt.Printf("verify ok: %s verdict=%s\n", r.SealID, r.Verdict)
 	return 0
 }

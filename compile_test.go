@@ -10,7 +10,7 @@ import (
 func compileTo(t *testing.T, input string) string {
 	t.Helper()
 	dir := t.TempDir()
-	in := filepath.Join(dir, "docket.toml")
+	in := filepath.Join(dir, "seal.toml")
 	if err := os.WriteFile(in, []byte(input), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestCompileExample(t *testing.T) {
 			t.Fatalf("paldron policy missing %q:\n%s", want, pp)
 		}
 	}
-	lock := read(t, filepath.Join(out, "docket.lock.json"))
+	lock := read(t, filepath.Join(out, "seal.lock.json"))
 	if !strings.Contains(lock, `"schema": 1`) || !strings.Contains(lock, "annalist.policy.toml") {
 		t.Fatalf("lock malformed:\n%s", lock)
 	}
@@ -67,7 +67,7 @@ func TestCompileExample(t *testing.T) {
 
 func TestUnknownKeyIsError(t *testing.T) {
 	dir := t.TempDir()
-	in := filepath.Join(dir, "docket.toml")
+	in := filepath.Join(dir, "seal.toml")
 	os.WriteFile(in, []byte("schema = 1\nsneaky = true\n"), 0o644)
 	if err := runCompile([]string{"--in", in, "--out-dir", filepath.Join(dir, "out")}); err == nil {
 		t.Fatal("unknown key silently accepted")
@@ -76,7 +76,7 @@ func TestUnknownKeyIsError(t *testing.T) {
 
 func TestBadSectionIsError(t *testing.T) {
 	dir := t.TempDir()
-	in := filepath.Join(dir, "docket.toml")
+	in := filepath.Join(dir, "seal.toml")
 	os.WriteFile(in, []byte("schema = 1\n[billing]\nprice = 5\n"), 0o644)
 	if err := runCompile([]string{"--in", in, "--out-dir", filepath.Join(dir, "out")}); err == nil {
 		t.Fatal("unknown section silently accepted")
@@ -85,7 +85,7 @@ func TestBadSectionIsError(t *testing.T) {
 
 func TestMissingSchemaIsError(t *testing.T) {
 	dir := t.TempDir()
-	in := filepath.Join(dir, "docket.toml")
+	in := filepath.Join(dir, "seal.toml")
 	os.WriteFile(in, []byte("[paths]\nallow = [\"src/\"]\n"), 0o644)
 	if err := runCompile([]string{"--in", in, "--out-dir", filepath.Join(dir, "out")}); err == nil {
 		t.Fatal("missing schema silently accepted")
