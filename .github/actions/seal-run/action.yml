@@ -1,0 +1,76 @@
+name: Seal compile and drift check
+description: Compile seal.toml with a pinned seal release and fail when the committed seal-out policies drifted.
+inputs:
+  seal_toml:
+    description: Path to the seal.toml org policy file.
+    required: false
+    default: seal.toml
+  out_dir:
+    description: Committed seal-out directory to compare the fresh compile against.
+    required: false
+    default: seal-out
+  version:
+    description: Seal release version, without the leading v. Falls back to main until the first tagged release.
+    required: false
+    default: main
+  repository:
+    description: GitHub repository hosting seal releases (owner/name).
+    required: false
+    default: GregDixonMXN/seal
+runs:
+  using: composite
+  steps:
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "1.24"
+        cache: true
+    - name: Fetch pinned seal source
+      shell: bash
+      env:
+        SEAL_VERSION: ${{ inputs.version }}
+        SEAL_REPOSITORY: ${{ inputs.repository }}
+      run: |
+        set -eu
+        DEST="${RUNNER_TEMP:-$(mktemp -d)}/seal-src"
+        rm -rf "$DEST"
+        if [ "$SEAL_VERSION" = "main" ]; then
+          git clone --depth 1 "https://github.com/${SEAL_REPOSITORY}.git" "$DEST"
+        else
+          git clone --depth 1 --branch "v${SEAL_VERSION}" "https://github.com/${SEAL_REPOSITORY}.git" "$DEST"
+        fi
+        (cd "$DEST" && go build -o "$DEST/seal" .)
+        echo "$DEST" >> "$GITHUB_PATH"
+    - name: Compile and check drift
+      shell: bash
+      env:
+        SEAL_TOML: ${{ inputs.seal_toml }}
+        SEAL_OUT_DIR: ${{ inputs.out_dir }}
+      run: |
+        set -eu
+        FRESH="${RUNNER_TEMP:-$(mktemp -d)}/seal-out-fresh"
+        rm -rf "$FRESH"
+        seal compile --in "$SEAL_TOML" --out-dir "$FRESH"
+        if ! diff -r "$FRESH" "$SEAL_OUT_DIR" >"$RUNNER_TEMP/seal-drift.txt" 2>&1; then
+          {
+            echo "## Seal drift check"
+            echo ""
+            echo "Fresh compile of \`$SEAL_TOML\` differs from committed \`$SEAL_OUT_DIR\` — run \`seal compile\` and commit the result."
+            echo ""
+            echo '```'
+            cat "$RUNNER_TEMP/seal-drift.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi
+        {
+          echo "## Seal drift check"
+          echo ""
+          echo "Fresh compile of \`$SEAL_TOML\` matches committed \`$SEAL_OUT_DIR\`."
+        } >> "$GITHUB_STEP_SUMMARY"
+    - name: Upload fresh compile
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: seal-out-fresh
+        path: ${{ runner.temp }}/seal-out-fresh/

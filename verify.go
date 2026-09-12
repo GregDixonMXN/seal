@@ -12,6 +12,10 @@ import (
 func runVerify(args []string) int {
 	var file, bundle string
 	for i := 0; i < len(args); i++ {
+		if args[i] == "--help" || args[i] == "-h" {
+			fmt.Fprintln(os.Stderr, "usage: seal verify [--bundle DIR] RECEIPT")
+			return 0
+		}
 		switch args[i] {
 		case "--bundle":
 			i++

@@ -23,6 +23,10 @@ func runStamp(args []string) (code int) {
 	var ballastChangeset, ballastOverlap string
 	lock := ""
 	for i := 0; i < len(args); i++ {
+		if args[i] == "--help" || args[i] == "-h" {
+			fmt.Fprintln(os.Stderr, "usage: seal stamp --command CMD --session ID --out RECEIPT --annalist-gate-exit N --paldron-exit N [--annalist-bundle DIR] [--lock seal.lock.json] [--ballast-changeset ID] [--ballast-overlap JSON]")
+			return 0
+		}
 		str := func() string {
 			i++
 			if i < len(args) {

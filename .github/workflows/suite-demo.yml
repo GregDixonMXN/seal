@@ -1,0 +1,41 @@
+name: suite demo
+on:
+  pull_request:
+    paths:
+      - 'seal.toml'
+      - 'seal-out/**'
+      - 'stamp.go'
+      - 'verify.go'
+      - '.github/actions/seal-run/**'
+      - '.github/workflows/suite-demo.yml'
+  workflow_dispatch:
+jobs:
+  demo-green:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/seal-run
+      - name: Stamp and verify a passing run
+        run: |
+          set -eu
+          mkdir -p /tmp/demo-bundle && printf '{"session":163}\n' > /tmp/demo-bundle/session.json
+          seal stamp --command "paldron exec -- python3 src/write_ok.py" --session 163 --out /tmp/pass.json \
+            --annalist-gate-exit 0 --paldron-exit 0 --annalist-bundle /tmp/demo-bundle
+          seal verify --bundle /tmp/demo-bundle /tmp/pass.json
+  demo-red:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+      - name: Verify detects a tampered bundle
+        run: |
+          set -eu
+          go build -o /tmp/seal .
+          mkdir -p /tmp/red-bundle && printf '{"session":1}\n' > /tmp/red-bundle/session.json
+          /tmp/seal stamp --command "x" --session 1 --out /tmp/red.json \
+            --annalist-gate-exit 0 --paldron-exit 0 --annalist-bundle /tmp/red-bundle
+          printf '{"session":2}\n' > /tmp/red-bundle/session.json
+          /tmp/seal verify --bundle /tmp/red-bundle /tmp/red.json
