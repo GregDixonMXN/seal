@@ -26,7 +26,7 @@ type Policy struct {
 }
 
 var knownKeys = map[string]bool{
-	"schema": true,
+	"schema":      true,
 	"paths.allow": true, "paths.deny": true, "max_files_changed": true,
 	"exec.allow_network": true, "exec.allow_binaries": true,
 	"exec.require_os_isolation": true, "exec.timeout_sec": true,
