@@ -9,6 +9,18 @@ Annalist and Paldron enforce. No dashboard, no runtime, no billing.
 
 Each tool works alone. Seal only helps them work together.
 
+## Install
+
+The Linux x86-64 binary is on the
+[releases page](https://github.com/GregDixonMXN/seal/releases).
+Or build from source (requires Go 1.24+):
+
+```sh
+go install github.com/GregDixonMXN/seal@latest
+# or
+git clone https://github.com/GregDixonMXN/seal && cd seal && go build -o seal .
+```
+
 ## Use
 
 seal compile --in seal.toml --out-dir ./seal-out
